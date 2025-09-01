@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BOBOY — Интерактивное меню и калькулятор заказа</title>
+  <meta name="description" content="BOBOY — национальная кухня Узбекистана. Полное меню, калькулятор для гостей и официантов, блюдо дня." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Preload identity watercolor art (place images next to this HTML file) -->
+  <link rel="preload" as="image" href="4.png">
+  <link rel="preload" as="image" href="10.png">
+  <link rel="preload" as="image" href="1.png">
+  <link rel="preload" as="image" href="6.png">
+  <link rel="preload" as="image" href="img399.png">
+  <style>
+    :root {
+      --brand-beige: #FDF6E9;
+      --brand-champagne-gold: #E0C097;
+      --brand-dark-text: #5D4037;
+      --brand-accent: #8D6E63;
+      --brand-blue: #004D40; /* Rich, dark green-blue for high contrast */
+    }
+    html, body {
+      background-color: var(--brand-beige);
+      color: var(--brand-dark-text);
+      font-family: 'Open Sans', sans-serif;
+      scroll-behavior: smooth;
+    }
+    /* Ensure content sits above decorative layers */
+    header, section, main, footer { position: relative; z-index: 1; }
+
+    /* Hidden scrollbar utility */
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+
+    /* Global page watercolor ornaments */
+    .page-decor { position: fixed; pointer-events: none; z-index: 0; filter: saturate(0.95) contrast(1.05); }
+    /* Bazaar carpets & jars (bottom-left) */
+    .page-decor-left { bottom: -30px; left: -40px; width: 60vw; max-width: 640px; height: 66vh; background: url('10.png') no-repeat left bottom / contain; opacity: .12; }
+    @media (min-width: 1024px) { .page-decor-left { opacity: .16; bottom: -20px; } }
+    /* Donkey rider sticker (bottom-right) */
+    .page-decor-right { bottom: -8px; right: 0; width: 32vw; max-width: 380px; height: 46vh; background: url('img399.png') no-repeat right bottom / contain; opacity: .10; }
+    @media (max-width: 767px) { .page-decor-right { display:none; } }
+    /* Wizard (light, top-right) */
+    .page-decor-wizard { top: -10px; right: -30px; width: 46vw; max-width: 520px; height: 60vh; background: url('1.png') no-repeat right top / contain; opacity: .08; }
+    @media (max-width: 1023px) { .page-decor-wizard { display:none; } }
+
+    .font-heading { font-family: 'Montserrat', sans-serif; }
+    h1, h2, h3 { font-family: 'Montserrat', sans-serif; color: var(--brand-blue); font-weight: 800; }
+
+    .fade-in { animation: fade .8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+    @keyframes fade { from {opacity:0; transform: translateY(15px)} to {opacity:1; transform: translateY(0)} }
+    .modal-enter { animation: modal .4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+    @keyframes modal { from {opacity:0; transform: scale(0.95) translateY(15px)} to {opacity:1; transform: scale(1) translateY(0)} }
+
+    .btn-primary { background-color: var(--brand-blue); color: white; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0, 77, 64, 0.2); }
+    .btn-primary:hover { background-color: #00382e; transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 25px rgba(0, 77, 64, 0.25); }
+
+    .card { background-color: #ffffff; border: 1px solid #EAE0D5; border-radius: 1.25rem; transition: box-shadow 0.4s ease, transform 0.4s ease; box-shadow: 0 5px 25px rgba(93, 64, 53, 0.08); overflow: hidden; }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 16px 40px rgba(93, 64, 53, 0.14); }
+
+    .input-styled { background-color: #fff; border: 1px solid #EAE0D5; outline: none; transition: all 0.2s ease; }
+    .input-styled:focus { box-shadow: 0 0 0 3px rgba(224, 192, 151, 0.6); border-color: var(--brand-champagne-gold); }
+
+    /* HERO with background art (crowd + eclipse) */
+    .hero-bg { position: relative; background-color: #fff; }
+    .hero-bg::before { content: ''; position: absolute; inset: 0; background-image: url('4.png'); background-size: cover; background-position: center bottom; z-index: 0; opacity: 0.22; }
+    .hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(253,246,233,1) 0%, rgba(253,246,233,0.55) 35%, rgba(253,246,233,0) 60%); z-index: 0; }
+    @media (min-width: 768px) { .hero-bg::before { opacity: 0.26; } }
+    .hero-content { position: relative; z-index: 1; }
+
+    .header-cart-btn { background-color: var(--brand-beige); border: 1px solid transparent; transition: all 0.3s ease; }
+    .header-cart-btn:hover { background-color: #fff; border-color: var(--brand-champagne-gold); box-shadow: 0 4px 15px rgba(224, 192, 151, 0.2); }
+
+    /* Category chips bar */
+    .chip { border: 1px solid #EAE0D5; background: #fff; }
+    .chip.active { border-color: var(--brand-champagne-gold); background: rgba(224,192,151,0.12); }
+
+    /* Section title badge with subtle rug texture */
+    .section-title { position: relative; display:inline-block; padding-right: 14px; }
+    .section-title::after { content:''; position:absolute; inset:-10px -18px -10px 0; background: url('6.png') no-repeat right center / 200px auto; opacity:.07; pointer-events:none; }
+
+    /* Swipe hint (mobile only) */
+    .swipe-hint { position:fixed; left:50%; transform:translateX(-50%); bottom:78px; background:rgba(0,0,0,0.55); color:#fff; font-weight:600; border-radius:999px; padding:8px 14px; z-index:25; animation: hintfade 2.4s ease forwards; font-size:12px; }
+    @keyframes hintfade { 0%{opacity:0; transform:translate(-50%,20px);} 20%{opacity:1; transform:translate(-50%,0);} 80%{opacity:1;} 100%{opacity:0;} }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Decorative fixed backgrounds (identity art) -->
+  <div class="page-decor page-decor-left" aria-hidden="true"></div>
+  <div class="page-decor page-decor-right" aria-hidden="true"></div>
+  <div class="page-decor page-decor-wizard" aria-hidden="true"></div>
+
+  <!-- Language Gate -->
+  <div id="lang-gate" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="card p-6 w-[92vw] max-w-lg modal-enter">
+      <h3 class="font-heading text-2xl font-semibold">Choose language / Tilni tanlang / Выберите язык</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6">
+        <button data-lang="uz" class="border border-gray-200 rounded-xl px-4 py-3 text-left hover:bg-gray-50 transition-colors"><div class="font-medium text-gray-800">O‘zbek</div><div class="text-xs text-gray-500 mt-0.5 uppercase tracking-widest">uz</div></button>
+        <button data-lang="ru" class="border border-gray-200 rounded-xl px-4 py-3 text-left hover:bg-gray-50 transition-colors"><div class="font-medium text-gray-800">Русский</div><div class="text-xs text-gray-500 mt-0.5 uppercase tracking-widest">ru</div></button>
+        <button data-lang="en" class="border border-gray-200 rounded-xl px-4 py-3 text-left hover:bg-gray-50 transition-colors"><div class="font-medium text-gray-800">English</div><div class="text-xs text-gray-500 mt-0.5 uppercase tracking-widest">en</div></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Topbar -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-gray-200/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <img src="https://placehold.co/44x44/8D6E63/FDF6E9?text=B&font=montserrat" alt="Boboy Logo" class="h-11 w-11 rounded-lg">
+        <div class="leading-tight">
+          <div class="font-heading font-extrabold text-2xl tracking-wide" style="color:var(--brand-blue)">BOBOY</div>
+          <div id="subtitle" class="text-xs" style="color:var(--brand-dark-text)">Национальная кухня Узбекистана</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="change-language" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white/0 hover:bg-gray-500/5 transition text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span id="change-language-label">Язык</span>
+        </button>
+        <button id="header-cart-btn" class="header-cart-btn relative inline-flex items-center gap-2.5 pl-4 pr-5 py-2.5 rounded-full font-semibold">
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand-blue)"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <span class="hidden sm:inline">Заказ</span>
+            <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section with crowd art background -->
+  <section class="relative overflow-hidden hero-bg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 hero-content">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="fade-in">
+          <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full" style="background-color: rgba(184, 158, 115, 0.1); border: 1px solid rgba(184, 158, 115, 0.3);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#d02a2a" stroke="#d02a2a" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M11.16 2.37A3.37 3.37 0 008.25 2a3.37 3.37 0 00-2.91.37c-2.53.85-3.41 4.33-2.22 6.58 1.9 3.63 6.62 7.74 6.88 7.94a.5.5 0 00.7 0c.26-.2 4.98-4.31 6.88-7.94 1.19-2.25.31-5.73-2.22-6.58A3.37 3.37 0 0015.75 2a3.37 3.37 0 00-2.91.37l-1.68 1.55-1.68-1.55z"/></svg>
+            <span id="dishOfDayLabel" class="text-sm uppercase tracking-wider font-semibold" style="color:var(--brand-accent);">Блюдо дня</span>
+          </div>
+          <h1 id="dishOfDayName" class="mt-5 text-4xl lg:text-6xl font-extrabold leading-tight tracking-tighter">—</h1>
+          <p id="dishOfDayDesc" class="mt-5 text-lg max-w-prose leading-relaxed">—</p>
+          <div class="mt-8 flex items-center gap-4" id="dishOfDayBadges"></div>
+        </div>
+        <div class="fade-in" style="animation-delay:.1s">
+            <div class="relative card p-3 shadow-2xl">
+              <div class="relative aspect-square rounded-xl overflow-hidden">
+                 <img id="dishOfDayImage" src="https://images.pexels.com/photos/10398939/pexels-photo-10398939.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Острый Плов" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500 ease-in-out">
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Controls -->
+  <section class="sticky top-[73px] z-30 border-b border-gray-200/80 bg-white/80 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col gap-4">
+      <div class="flex flex-col md:flex-row md:items-center gap-4">
+        <div class="relative flex-1">
+          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input id="search" placeholder="Поиск по меню…" class="w-full pl-12 pr-4 py-3 text-base rounded-full input-styled">
+        </div>
+        <button id="vegOnlyBtn" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border transition-colors border-gray-200 hover:bg-gray-50 font-semibold text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="currentColor" class="text-green-500"><path d="M7 14c-3 0-4-1-4-4 0-3 2-6 5-7 3 1 5 4 5 7s-1 4-4 4-2-1-2-1zM4 15c2 2 6 2 8 0"/></svg>
+          <span id="vegOnlyLabel">Только вегетарианское</span>
+        </button>
+      </div>
+      <!-- Category chips rendered dynamically -->
+      <div id="cat-chips" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 space-y-16" id="menu-root"></main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-gray-200/80 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid md:grid-cols-3 gap-8">
+      <div>
+        <div class="font-heading font-semibold text-xl" style="color:var(--brand-blue)">BOBOY</div>
+        <p id="footerCopy" class="text-sm mt-2 leading-relaxed">Атмосфера Узбекистана: уникальные ароматы и вкусы.</p>
+      </div>
+      <div>
+        <h3 id="locationsLabel" class="font-heading font-semibold mb-4">Адреса</h3>
+        <ul class="space-y-3 text-sm">
+          <li class="flex items-start gap-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 opacity-70 flex-shrink-0"><path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> <div><strong>Tashkent City Mall</strong><br>3-й этаж, +998 77 109 88 77</div></li>
+          <li class="flex items-start gap-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mt-0.5 opacity-70 flex-shrink-0"><path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1118 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> <div><strong>ул. Тараса Шевченко, 38А</strong><br>+998 77 235 88 77</div></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-heading font-semibold mb-4">Instagram</h3>
+        <a href="#" class="inline-flex items-center gap-2 hover:text-brand-accent font-semibold transition-colors">@boboycafe_uz</a>
+        <p id="allergyNote" class="text-xs text-gray-500/80 mt-4">Пожалуйста, предупредите нас о любых аллергиях. Состав блюд может незначительно отличаться.</p>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Cart/Calculator Modal -->
+  <div id="cart-modal" class="fixed inset-0 z-[100] hidden items-end md:items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="hideCart()"></div>
+    <div class="relative w-full max-w-lg mx-auto card modal-enter">
+      <div class="p-5 border-b border-gray-200 flex justify-between items-start">
+          <h3 id="cartTitle" class="font-heading text-xl font-semibold">Ваш заказ / Калькулятор</h3>
+          <button class="p-2 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600" onclick="hideCart()">
+             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+      </div>
+      <div class="p-5 max-h-[70vh] overflow-y-auto">
+        <!-- TABS -->
+        <div class="flex border-b border-gray-200 mb-4">
+            <button id="tab-order" class="px-4 py-2 font-semibold border-b-2" style="color:var(--brand-blue); border-color:var(--brand-blue)">Принять заказ</button>
+            <button id="tab-group" class="px-4 py-2 text-gray-500 font-semibold border-b-2 border-transparent hover:border-gray-300 hover:text-gray-700">Расчет на группу</button>
+        </div>
+        <!-- Order Tab Content -->
+        <div id="content-order">
+            <div id="cart-items" class="space-y-3">
+                <p id="cart-empty" class="text-gray-500 text-center py-10">Ваша корзина пуста</p>
+            </div>
+            <div id="cart-summary" class="mt-6 border-t border-gray-200 pt-4 space-y-3 hidden">
+                <div class="flex justify-between items-center text-md">
+                    <span id="subtotalLabel">Подытог:</span>
+                    <span id="subtotal-value" class="font-semibold">0 UZS</span>
+                </div>
+                <div class="flex justify-between items-center text-md">
+                    <label for="service-charge" id="service-charge-label">Процент за обслуживание (%):</label>
+                    <input type="number" id="service-charge" min="0" value="15" class="w-24 text-right rounded-lg p-2 input-styled font-semibold">
+                </div>
+                <div class="flex justify-between font-bold text-xl font-heading mt-2 pt-3 border-t">
+                    <span id="totalLabel">ИТОГО:</span>
+                    <span id="total-value">0 UZS</span>
+                </div>
+                <button id="clear-cart" class="w-full mt-4 text-sm text-center text-red-600 hover:underline">Очистить заказ</button>
+            </div>
+        </div>
+        <!-- Group Calculator Tab Content -->
+        <div id="content-group" class="hidden">
+            <div class="space-y-4">
+                <div>
+                    <label for="group-item-select" class="block mb-2 font-semibold" id="groupItemLabel">Выберите блюдо или сет:</label>
+                    <select id="group-item-select" class="w-full p-3 rounded-lg input-styled"></select>
+                </div>
+                <div>
+                    <label for="group-people-count" class="block mb-2 font-semibold" id="groupPeopleLabel">Количество человек:</label>
+                    <input type="number" id="group-people-count" min="1" value="1" class="w-full p-3 rounded-lg input-styled">
+                </div>
+                <div class="mt-6 border-t border-gray-200 pt-4 space-y-2 text-lg">
+                    <div class="flex justify-between">
+                        <span id="groupPerPersonLabel">Цена на человека:</span>
+                        <span id="group-per-person-value" class="font-semibold">0 UZS</span>
+                    </div>
+                    <div class="flex justify-between font-bold font-heading">
+                        <span id="groupTotalLabel">Общая стоимость:</span>
+                        <span id="group-total-value">0 UZS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+  // ————— Data/Strings —————
+  const STR = {
+    ru: {
+      topbarSubtitle: "Национальная кухня Узбекистана", changeLanguage: "Язык", dishOfDay: "Блюдо дня",
+      dishOfDayDesc: "Легендарный свадебный плов в его огненной интерпретации. С отборной бараниной, красным перцем и восточными специями.",
+      chefRecommends: "Рекомендует шеф", vegetarian: "Вегетарианское", searchPlaceholder: "Поиск по меню…",
+      vegOnly: "Только вегетарианское", locations: "Адреса", footerCopy: "Атмосфера Узбекистана: уникальные ароматы и вкусы.",
+      allergyNote: "Пожалуйста, предупредите нас о любых аллергиях. Состав блюд может незначительно отличаться.",
+      addToOrder: "В заказ", cartTitle: "Ваш заказ / Калькулятор", cartEmpty: "Ваша корзина пуста",
+      subtotal: "Подытог", serviceCharge: "Процент за обслуживание (%)", total: "ИТОГО", clearCart: "Очистить заказ",
+      tabOrder: "Принять заказ", tabGroup: "Расчет на группу", groupItem: "Выберите блюдо или сет:",
+      groupPeople: "Количество человек:", groupPerPerson: "Цена на человека:", groupTotal: "Общая стоимость:",
+    },
+    en: {
+      topbarSubtitle: "Uzbek national cuisine", changeLanguage: "Language", dishOfDay: "Dish of the Day",
+      dishOfDayDesc: "The legendary wedding pilaf in its fiery interpretation. With selected lamb, red pepper and oriental spices.",
+      chefRecommends: "Chef recommends", vegetarian: "Vegetarian", searchPlaceholder: "Search the menu…",
+      vegOnly: "Vegetarian only", locations: "Locations", footerCopy: "Immerse yourself in Uzbekistan’s unique tastes and aromas.",
+      allergyNote: "Please let us know about any allergies. Ingredients may vary slightly.",
+      addToOrder: "Add to order", cartTitle: "Your Order / Calculator", cartEmpty: "Your cart is empty",
+      subtotal: "Subtotal", serviceCharge: "Service Charge (%)", total: "TOTAL", clearCart: "Clear Order",
+      tabOrder: "Take Order", tabGroup: "Group Calculator", groupItem: "Select item or set:",
+      groupPeople: "Number of people:", groupPerPerson: "Price per person:", groupTotal: "Total cost:",
+    },
+    uz: {
+      topbarSubtitle: "Oʻzbek milliy taomlari", changeLanguage: "Til", dishOfDay: "Kun taomi",
+      dishOfDayDesc: "Afsonaviy to'y oshi o'zining o'tli talqinida. Tanlangan qo'zichoq, qizil qalampir va sharqona ziravorlar bilan.",
+      chefRecommends: "Shef tavsiya qiladi", vegetarian: "Vegetarian", searchPlaceholder: "Menyu bo‘yicha qidirish…",
+      vegOnly: "Faqat vegetarian", locations: "Manzillar", footerCopy: "Oʻzbekistonning oʻziga xos tamlari va hidlari.",
+      allergyNote: "Allergiyangiz bo‘lsa, oldindan ayting. Tarkib biroz farq qilishi mumkin.",
+      addToOrder: "Qo'shish", cartTitle: "Sizning buyurtmangiz / Kalkulyator", cartEmpty: "Sizning savatingiz bo'sh",
+      subtotal: "Jami", serviceCharge: "Xizmat haqi (%)", total: "UMUMIY", clearCart: "Buyurtmani tozalash",
+      tabOrder: "Buyurtma berish", tabGroup: "Guruh uchun hisoblash", groupItem: "Taom yoki to'plamni tanlang:",
+      groupPeople: "Odamlar soni:", groupPerPerson: "Bir kishi uchun narx:", groupTotal: "Umumiy narx:",
+    },
+  };
+
+  const ITEMS = (()=>{
+    const I=(id,name,price,opts={})=>({id,name,price,description:{ru:'',en:'',uz:''},...opts});
+    return {
+      // Mains (added spicy pilaf)
+      spicy_pilaf: I("spicy_pilaf", {ru:"Острый Плов", en:"Spicy Pilaf", uz:"Achchiq Osh"}, 55000),
+      
+      // Starters
+      suzma: I("suzma", {ru:"Сузма",en:"Suzma",uz:"Suzma"}, 25000, {veg:true}),
+      marinated_veg: I("marinated_veg", {ru:"Маринованные овощи",en:"Marinated Vegetables",uz:"Tuzlangan sabzavotlar"}, 38000, {veg:true}),
+      kulcha: I("kulcha", {ru:"Домашний хлеб (кулча)",en:"House Bread (Kulcha)",uz:"Non (Kulcha)"}, 15000, {veg:true}),
+      garlic_nan: I("garlic_nan", {ru:"Чесночный нан",en:"Garlic Nan",uz:"Sarimsoqli non"}, 28000, {veg:true}),
+      khach_ap: I("khach_ap", {ru:"Хачапури по-аджарски",en:"Khachapuri (Adjarian)",uz:"Xachapuri-Ajar"}, 73000, {veg:true}),
+      khach_meg: I("khach_meg", {ru:"Хачапури по-мегрельски",en:"Khachapuri (Megrelian)",uz:"Xachapuri-Megrel"}, 73000, {veg:true}),
+      cheb_beef: I("cheb_beef", {ru:"Мини-чебурек с говядиной (4 шт)",en:"Mini Cheburek with Beef (4 pcs)",uz:"Mini cheburek (go‘shtli) (4 dona)"}, 40000),
+      cheb_cheese: I("cheb_cheese", {ru:"Мини-чебурек с сыром (4 шт)",en:"Mini Cheburek with Cheese (4 pcs)",uz:"Mini cheburek (pishloqli) (4 dona)"}, 35000, {veg:true}),
+      somsa_trad: I("somsa_trad", {ru:"Самса традиционная",en:"Somsa Traditional",uz:"Tandir somsa"}, 20000),
+      somsa_olot: I("somsa_olot", {ru:"Самса Олот",en:"Somsa Olot",uz:"Olot somsa"}, 15000),
+      turkish_meze: I("turkish_meze", {ru:"Турецкий мезе сет",en:"Turkish Meze Set",uz:"Turkcha mezze seti"}, 95000),
+
+      // Salads
+      achik: I("achik", {ru:"Ачик-чучук",en:"Achik Chuchuk",uz:"Achik chuchuk"}, 29000, {veg:true}),
+      caesar: I("caesar", {ru:"Цезарь с курицей",en:"Caesar with Chicken",uz:"Salat Sezar tovuqli"}, 89000),
+      greek: I("greek", {ru:"Греческий салат",en:"Greek Salad",uz:"Greck salad"}, 79000, {veg:true}),
+      bakhor: I("bakhor", {ru:"Салат Бахор",en:"Salad Bakhor",uz:"Bahor salati"}, 45000, {veg:true}),
+      olivier: I("olivier", {ru:"Оливье",en:"Olivier Salad",uz:"Salat Olivye"}, 63000),
+      eggplant_tempura: I("eggplant_tempura", {ru:"Салат с баклажаном темпура",en:"Eggplant Tempura Salad",uz:"Qarsildoq baqlajon"}, 69000, {veg:true}),
+      choban: I("choban", {ru:"Чобан салат",en:"Choban Salad",uz:"Choban salat"}, 69000, {veg:true}),
+      
+      // Soups
+      kainatma: I("kainatma", {ru:"Кайнатма шурпа",en:"Kainatma Shurpa",uz:"Qaynatma sho‘rva"}, 79000),
+      lagman_uyghur: I("lagman_uyghur", {ru:"Лагман уйгурский",en:"Lagman Uyghur",uz:"Uyg‘ur lag‘mon"}, 63000),
+      mastava: I("mastava", {ru:"Мастава",en:"Mastava",uz:"Mastava"}, 55000),
+      chicken_noodle: I("chicken_noodle", {ru:"Куриный суп с лапшой",en:"Chicken Noodle Soup",uz:"Tovuqli sho‘rva"}, 49000),
+      chuchvara: I("chuchvara", {ru:"Чучвара",en:"Chuchvara",uz:"Chuchvara"}, 61000),
+      moshxurda: I("moshxurda", {ru:"Мошхурда",en:"Moshxurda",uz:"Moshxo‘rda"}, 65000),
+      lentil: I("lentil", {ru:"Чечевичный суп",en:"Lentil Soup",uz:"Yasmiq sho'rva"}, 40000, {veg:true}),
+      
+      // Mains
+      festive_pilaf: I("festive_pilaf", {ru:"Праздничный плов",en:"Festive Pilaf",uz:"Osh"}, 50000),
+      say_beef: I("say_beef", {ru:"Сай говяжий",en:"Beef SAY",uz:"Go‘shtli Say"}, 89000),
+      manti: I("manti", {ru:"Манты (1 шт)",en:"Manti (1 pc)",uz:"Manti (1 dona)"}, 19000),
+      kazan_kebab: I("kazan_kebab", {ru:"Казан-кабоб",en:"Kazan Kebab",uz:"Qozon kabob"}, 159000),
+      fried_lagman: I("fried_lagman", {ru:"Лагман жареный",en:"Fried Lagman",uz:"Qovurma lag‘mon"}, 73000),
+      norin: I("norin", {ru:"Норин",en:"Norin",uz:"Norin"}, 93000),
+      
+      // Kebabs
+      minced_beef: I("minced_beef", {ru:"Кийма шашлык",en:"Minced Beef Kebab",uz:"Qiyma kabob"}, 35000),
+      beef_kebab: I("beef_kebab", {ru:"Шашлык из говядины",en:"Beef Kebab",uz:"Mol jaz"}, 43000),
+      lamb_kebab: I("lamb_kebab", {ru:"Шашлык из баранины",en:"Lamb Kebab",uz:"Qo‘y jaz"}, 45000),
+      lamb_chops: I("lamb_chops", {ru:"Каре ягнёнка",en:"Lamb chops",uz:"Qo‘zi qovurg‘asi"}, 75000),
+      chicken_wings: I("chicken_wings", {ru:"Куриные крылья",en:"Chicken Wings",uz:"Tovuq qanoti"}, 42000),
+      veg_kebab: I("veg_kebab", {ru:"Овощной шашлык",en:"Vegetarian Kebab",uz:"Sabzavotli kabob"}, 35000, {veg:true}),
+
+      // Desserts
+      napoleon: I("napoleon", {ru:"Наполеон",en:"Napoleon",uz:"Napoleon"}, 69000, {veg:true}),
+      honey_cake: I("honey_cake", {ru:"Медовик",en:"Honey Cake",uz:"Medovik"}, 72000, {veg:true}),
+      san_sebastian: I("san_sebastian", {ru:"Сан-Себастьян",en:"San Sebastian Cheesecake",uz:"San Sebastyan"}, 79000, {veg:true}),
+      bakhlava: I("bakhlava", {ru:"Пахлава",en:"Bakhlava",uz:"Paxlava"}, 59000, {veg:true}),
+
+      // Drinks
+      passion_mango_lemonade: I("passion_mango_lemonade", {ru:"Лимонад Маракуйя-Манго",en:"Passionfruit Mango Lemonade",uz:"Marakuya Mango limonad"}, 73000, {veg:true}),
+      classic_mojito: I("classic_mojito", {ru:"Мохито классический",en:"Classic Mojito",uz:"Klassik moxito"}, 41000, {veg:true}),
+      ayran: I("ayran", {ru:"Айран",en:"Ayran",uz:"Ayron"}, 35000, {veg:true}),
+      black_tea: I("black_tea", {ru:"Чай черный",en:"Black tea",uz:"Qora choy"}, 29000, {veg:true}),
+    };
+  })();
+
+  const CATEGORIES = {
+    starters:["suzma","marinated_veg","kulcha","garlic_nan","khach_ap","khach_meg","cheb_beef","cheb_cheese","somsa_trad","somsa_olot","turkish_meze"],
+    salads:["achik","caesar","greek","bakhor","olivier","eggplant_tempura","choban"],
+    soups:["kainatma","lagman_uyghur","mastava","chicken_noodle","chuchvara","moshxurda","lentil"],
+    mains:["spicy_pilaf", "festive_pilaf","say_beef","manti","kazan_kebab","fried_lagman", "norin"],
+    kebabs:["minced_beef","beef_kebab","lamb_kebab","lamb_chops","chicken_wings","veg_kebab"],
+    desserts:["napoleon", "honey_cake", "san_sebastian", "bakhlava"],
+    drinks:["passion_mango_lemonade", "classic_mojito", "ayran", "black_tea"],
+  };
+
+  const CAT_NAMES = {
+    ru: { starters:"Закуски", salads:"Салаты", soups:"Супы", mains:"Горячие блюда", kebabs:"Шашлыки", desserts:"Десерты", drinks:"Напитки" },
+    en: { starters:"Starters", salads:"Salads", soups:"Soups", mains:"Main Courses", kebabs:"Kebabs", desserts:"Desserts", drinks:"Drinks" },
+    uz: { starters:"Yaxna taomlar", salads:"Salatlar", soups:"Sho‘rvalar", mains:"Asosiy taomlar", kebabs:"Kaboblar", desserts:"Shirinliklar", drinks:"Ichimliklar" },
+  };
+
+  let lang = localStorage.getItem('boboy_lang') || 'ru';
+  let vegOnly = false;
+  let query = '';
+  let cart = JSON.parse(localStorage.getItem('boboy_cart')) || [];
+
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const fmt = n => new Intl.NumberFormat('ru-RU').format(n) + ' UZS';
+  function locName(obj) { return obj[lang] || obj.ru; }
+
+  function renderTopCopy(){
+    Object.keys(STR[lang]).forEach(key => {
+        const el = document.querySelector(`#${key}Label`) || document.querySelector(`#${key}`);
+        if(el) {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = STR[lang][key];
+            else el.textContent = STR[lang][key];
+        }
+    });
+    $('#subtitle').textContent = STR[lang].topbarSubtitle;
+    $('#change-language-label').textContent = STR[lang].changeLanguage;
+    // Re-render chips when language changes
+    renderCategoryChips();
+  }
+
+  function dishOfDayItem(){ return ITEMS.spicy_pilaf; }
+
+  function renderHero(){
+    const d = dishOfDayItem();
+    if (!$('#dishOfDayName') || !$('#dishOfDayDesc') || !$('#dishOfDayImage')) return;
+    $('#dishOfDayName').textContent = locName(d.name);
+    $('#dishOfDayDesc').textContent = STR[lang].dishOfDayDesc;
+    $('#dishOfDayImage').src = 'https://images.pexels.com/photos/10398939/pexels-photo-10398939.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2';
+    $('#dishOfDayImage').alt = locName(d.name);
+    const box = $('#dishOfDayBadges');
+    if (box) { box.innerHTML = `<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-lg border bg-amber-500/10 border-amber-500/20 text-amber-800 font-bold">${fmt(d.price)}</span>`; }
+  }
+
+  function buildCard(item){
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card p-4 flex flex-col';
+    cardDiv.innerHTML = `
+      <div class="flex-grow">
+        <div class="flex justify-between items-start">
+            <h4 class="font-heading font-bold text-lg text-brand-blue pr-2">${locName(item.name)}</h4>
+            ${item.veg ? `<div class="w-7 h-7 flex-shrink-0 rounded-full bg-green-100 flex items-center justify-center" title="${STR[lang].vegetarian}"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\" stroke=\"currentColor\" class=\"text-green-600\"><path d=\"M7 14c-3 0-4-1-4-4 0-3 2-6 5-7 3 1 5 4 5 7s-1 4-4 4-2-1-2-1zM4 15c2 2 6 2 8 0\"/></svg></div>` : ''}
+        </div>
+        <p class="text-sm mt-1 text-gray-600">${locName(item.description) || ''}</p>
+      </div>
+      <div class="flex items-center justify-between mt-4">
+        <div class="text-lg font-bold" style="color: var(--brand-dark-text)">${fmt(item.price)}</div>
+        <button class="add-to-cart-btn btn-primary rounded-full py-2 px-5 font-semibold text-sm" data-id="${item.id}">${STR[lang].addToOrder}</button>
+      </div>
+    `;
+    cardDiv.querySelector('.add-to-cart-btn').addEventListener('click', (e) => { e.stopPropagation(); addToCart(item.id); });
+    return cardDiv;
+  }
+  
+  function matchesQuery(item){
+    const text = (locName(item.name)).toLowerCase();
+    const okQuery = !query || text.includes(query.toLowerCase());
+    const okVeg = !vegOnly || item.veg;
+    return okQuery && okVeg;
+  }
+
+  function renderMenu(){
+    const root = $('#menu-root');
+    if (!root) return;
+    root.innerHTML = '';
+    Object.keys(CATEGORIES).forEach(catId => {
+      const filteredItems = CATEGORIES[catId].map(key => ITEMS[key]).filter(matchesQuery);
+      if (filteredItems.length > 0) {
+        const sec = document.createElement('section');
+        sec.id = `cat-${catId}`;
+        sec.innerHTML = `<h2 class="section-title text-3xl font-bold mb-8">${CAT_NAMES[lang][catId]}</h2>`;
+        const grid = document.createElement('div');
+        grid.className='grid sm:grid-cols-2 lg:grid-cols-3 gap-8';
+        filteredItems.forEach(it => grid.appendChild(buildCard(it)));
+        sec.appendChild(grid);
+        root.appendChild(sec);
+      }
+    });
+    renderCategoryChips();
+  }
+
+  // Category chips (quick navigation)
+  function renderCategoryChips(){
+    const chipsBox = $('#cat-chips');
+    if (!chipsBox) return;
+    chipsBox.innerHTML = '';
+    Object.keys(CATEGORIES).forEach(catId => {
+      const chip = document.createElement('button');
+      chip.className = 'chip px-3 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap';
+      chip.textContent = CAT_NAMES[lang][catId];
+      chip.onclick = () => {
+        document.getElementById(`cat-${catId}`)?.scrollIntoView({behavior:'smooth', block:'start'});
+        setActiveChip(catId);
+      };
+      chip.dataset.cat = catId;
+      chipsBox.appendChild(chip);
+    });
+  }
+
+  function setActiveChip(catId){
+    $$('#cat-chips .chip').forEach(c=>c.classList.toggle('active', c.dataset.cat===catId));
+  }
+
+  function showCart() { $('#cart-modal').classList.remove('hidden'); $('#cart-modal').classList.add('flex'); }
+  function hideCart() { $('#cart-modal').classList.add('hidden'); $('#cart-modal').classList.remove('flex'); }
+
+  function saveCart() { localStorage.setItem('boboy_cart', JSON.stringify(cart)); }
+
+  function addToCart(itemId) {
+    const existingItem = cart.find(item => item.id === itemId);
+    if (existingItem) existingItem.quantity++;
+    else cart.push({ id: itemId, quantity: 1 });
+    renderCart();
+  }
+
+  function updateCartQuantity(itemId, change) {
+    const itemInCart = cart.find(item => item.id === itemId);
+    if (itemInCart) {
+      itemInCart.quantity += change;
+      if (itemInCart.quantity <= 0) cart = cart.filter(item => item.id !== itemId);
+    }
+    renderCart();
+  }
+
+  function renderCart() {
+    saveCart();
+    const cartItemsContainer = $('#cart-items');
+    const cartEmptyMsg = $('#cart-empty');
+    const cartSummary = $('#cart-summary');
+    const cartCountBadge = $('#cart-count');
+
+    if (!cartItemsContainer || !cartEmptyMsg || !cartSummary || !cartCountBadge) return;
+
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+    cartCountBadge.textContent = totalItems;
+    cartCountBadge.classList.toggle('hidden', totalItems === 0);
+    
+    if (cart.length === 0) {
+      cartItemsContainer.innerHTML = '';
+      cartEmptyMsg.classList.remove('hidden');
+      cartSummary.classList.add('hidden');
+      return;
+    }
+    cartEmptyMsg.classList.add('hidden');
+    cartSummary.classList.remove('hidden');
+
+    cartItemsContainer.innerHTML = cart.map(cartItem => {
+      const itemData = ITEMS[cartItem.id];
+      if (!itemData) return '';
+      return `
+        <div class="flex items-center justify-between gap-3 p-2 rounded-lg bg-gray-50">
+            <div>
+                <div class="font-semibold">${locName(itemData.name)}</div>
+                <div class="text-sm text-gray-600">${fmt(itemData.price)}</div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="quantity-change h-8 w-8 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors font-bold" data-id="${cartItem.id}" data-change="-1">-</button>
+                <span class="font-bold w-8 text-center text-lg">${cartItem.quantity}</span>
+                <button class="quantity-change h-8 w-8 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors font-bold" data-id="${cartItem.id}" data-change="1">+</button>
+            </div>
+        </div>
+      `;
+    }).join('');
+    calculateTotal();
+  }
+
+  function calculateTotal() {
+      const subtotal = cart.reduce((sum, item) => { const itemData = ITEMS[item.id]; return itemData ? sum + itemData.price * item.quantity : sum; }, 0);
+      let servicePercentage = parseFloat($('#service-charge').value);
+      if (isNaN(servicePercentage) || servicePercentage < 0) { servicePercentage = 0; }
+      const total = subtotal * (1 + servicePercentage / 100);
+      $('#subtotal-value').textContent = fmt(subtotal);
+      $('#total-value').textContent = fmt(total);
+  }
+
+  function clearCart() { cart = []; renderCart(); }
+
+  function populateGroupSelect() {
+      const selectEl = $('#group-item-select');
+      if (!selectEl) return;
+      selectEl.innerHTML = Object.values(ITEMS).map(item => `<option value="${item.id}">${locName(item.name)}</option>`).join('');
+      calculateGroupTotal();
+  }
+
+  function calculateGroupTotal() {
+      const groupItemSelect = $('#group-item-select');
+      const groupPeopleCount = $('#group-people-count');
+      if (!groupItemSelect || !groupPeopleCount) return;
+
+      const item = ITEMS[groupItemSelect.value];
+      if (!item) return;
+      
+      const peopleCount = parseInt(groupPeopleCount.value) || 1;
+      
+      const groupPerPersonValue = $('#group-per-person-value');
+      const groupTotalValue = $('#group-total-value');
+
+      if (groupPerPersonValue) groupPerPersonValue.textContent = fmt(item.price);
+      if (groupTotalValue) groupTotalValue.textContent = fmt(item.price * peopleCount);
+  }
+  
+  function bindLangButtons(){
+    $$('#lang-gate [data-lang]').forEach(btn=>{
+      btn.onclick = ()=>{
+        lang = btn.getAttribute('data-lang');
+        localStorage.setItem('boboy_lang', lang);
+        sessionStorage.setItem('lang_gate_shown','1');
+        $('#lang-gate').classList.add('hidden');
+        init();
+      };
+    });
+  }
+
+  function openLangGateIfNeeded(){
+    const gate = $('#lang-gate');
+    if (gate && !localStorage.getItem('boboy_lang') && !sessionStorage.getItem('lang_gate_shown')) {
+        gate.classList.remove('hidden');
+        gate.classList.add('flex');
+    }
+  }
+
+  function setupEventListeners() {
+    $('#change-language')?.addEventListener('click', () => { $('#lang-gate')?.classList.remove('hidden'); $('#lang-gate')?.classList.add('flex'); });
+    $('#search')?.addEventListener('input', e => { query = e.target.value; renderMenu(); });
+    $('#vegOnlyBtn')?.addEventListener('click', () => { 
+        vegOnly = !vegOnly; 
+        $('#vegOnlyBtn').classList.toggle('bg-green-100', vegOnly);
+        $('#vegOnlyBtn').classList.toggle('border-green-300', vegOnly);
+        renderMenu(); 
+    });
+    
+    $('#header-cart-btn')?.addEventListener('click', showCart);
+    $('#cart-modal')?.addEventListener('click', e => {
+      if(e.target.matches('.quantity-change')) { updateCartQuantity(e.target.dataset.id, parseInt(e.target.dataset.change)); }
+    });
+    $('#service-charge')?.addEventListener('input', calculateTotal);
+    $('#clear-cart')?.addEventListener('click', clearCart);
+    
+    const groupItemSelect = $('#group-item-select');
+    const groupPeopleCount = $('#group-people-count');
+    if (groupItemSelect) groupItemSelect.addEventListener('input', calculateGroupTotal);
+    if (groupPeopleCount) groupPeopleCount.addEventListener('input', calculateGroupTotal);
+
+    const tabOrder = $('#tab-order'), tabGroup = $('#tab-group');
+    const contentOrder = $('#content-order'), contentGroup = $('#content-group');
+    const tabs = { order: tabOrder, group: tabGroup };
+    const contents = { order: contentOrder, group: contentGroup };
+    
+    Object.keys(tabs).forEach(key => {
+        tabs[key]?.addEventListener('click', () => {
+            Object.values(tabs).forEach(t => {
+                if (!t) return;
+                t.style.color = '';
+                t.style.borderColor = 'transparent';
+                t.classList.remove('hover:border-gray-300', 'hover:text-gray-700', 'text-gray-500');
+                t.classList.add('text-gray-500', 'hover:border-gray-300', 'hover:text-gray-700');
+            });
+            Object.values(contents).forEach(c => c?.classList.add('hidden'));
+            
+            if (tabs[key]) {
+              tabs[key].style.color = 'var(--brand-blue)';
+              tabs[key].style.borderColor = 'var(--brand-blue)';
+              tabs[key].classList.remove('text-gray-500');
+            }
+            if (contents[key]) { contents[key].classList.remove('hidden'); }
+        });
+    });
+
+    // —— Mobile swipe: left/right to jump between categories ——
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      enableCategorySwipe();
+      showSwipeHintOnce();
+    }
+
+    // Highlight active chip while scrolling
+    const sections = Object.keys(CATEGORIES).map(id => document.getElementById('cat-'+id)).filter(Boolean);
+    const observer = new IntersectionObserver((entries)=>{
+      const topEntry = entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (topEntry) {
+        const catId = topEntry.target.id.replace('cat-','');
+        setActiveChip(catId);
+      }
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: [0,1] });
+    sections.forEach(sec=>observer.observe(sec));
+  }
+
+  // Mobile swipe navigation
+  function enableCategorySwipe(){
+    let xStart=null, yStart=null, locked=false;
+    const THRESH = 50; // px
+    const root = document.body;
+    root.addEventListener('touchstart', (evt)=>{
+      const t = evt.changedTouches[0];
+      xStart = t.clientX; yStart = t.clientY; locked=false;
+    }, {passive:true});
+    root.addEventListener('touchmove', (evt)=>{
+      if (xStart===null || locked) return;
+      const t = evt.changedTouches[0];
+      const dx = t.clientX - xStart; const dy = t.clientY - yStart;
+      if (Math.abs(dx) > Math.abs(dy)*1.6 && Math.abs(dx) > THRESH) {
+        locked = true; // prevent multiple triggers per gesture
+        const dir = dx < 0 ? 1 : -1; // 1 = next, -1 = prev
+        jumpToSiblingCategory(dir);
+      }
+    }, {passive:true});
+    root.addEventListener('touchend', ()=>{ xStart=yStart=null; locked=false; }, {passive:true});
+  }
+
+  function visibleCategoryIndex(){
+    const ids = Object.keys(CATEGORIES);
+    let bestIdx = 0; let bestDist = Infinity;
+    ids.forEach((id, idx)=>{
+      const el = document.getElementById('cat-'+id);
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const dist = Math.abs(rect.top - 88); // distance from below sticky controls
+      if (dist < bestDist) { bestDist = dist; bestIdx = idx; }
+    });
+    return bestIdx;
+  }
+
+  function jumpToSiblingCategory(direction){
+    const ids = Object.keys(CATEGORIES);
+    const current = visibleCategoryIndex();
+    const targetIdx = Math.min(ids.length-1, Math.max(0, current + direction));
+    const targetId = ids[targetIdx];
+    document.getElementById('cat-'+targetId)?.scrollIntoView({behavior:'smooth', block:'start'});
+    setActiveChip(targetId);
+  }
+
+  function showSwipeHintOnce(){
+    if (sessionStorage.getItem('swipe_hint_shown')) return;
+    sessionStorage.setItem('swipe_hint_shown','1');
+    const hint = document.createElement('div');
+    hint.className = 'swipe-hint';
+    hint.textContent = 'Свайпайте по экрану — следующий раздел';
+    document.body.appendChild(hint);
+    setTimeout(()=>hint.remove(), 2600);
+  }
+
+  function init(){
+    renderTopCopy();
+    renderHero();
+    renderMenu();
+    renderCart();
+    populateGroupSelect();
+  }
+  
+  bindLangButtons();
+  openLangGateIfNeeded();
+  setupEventListeners();
+  init();
+
+  </script>
+</body>
+</html>
