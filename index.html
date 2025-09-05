@@ -41,8 +41,11 @@
 
     /* Тёмно-синие заголовки разделов меню + белый контур */
     .section-title{color:var(--brand-deep-blue);
-      /* мягкий белый контур для читаемости на фоне */
-      text-shadow:0 0 2px #fff, 0 0 6px rgba(255,255,255,.95);
+      /* Чёткий непрозрачный белый контур для читаемости */
+      -webkit-text-stroke: 1px #fff; /* поддерживается в WebKit/Chromium */
+      paint-order: stroke fill;
+      /* Фолбэк: плотная обводка из теней для всех браузеров */
+      text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 2px #fff;
     }
 
     .fade-in{animation:fade .6s cubic-bezier(.25,.46,.45,.94) both}
@@ -96,6 +99,14 @@
     /* Жёсткий фикс от "дергания" текста в hero */
     #hero-text{will-change:height;contain:layout paint}
 
+    /* HERO: ручное управление слайдером */
+    #hero-slider{touch-action: pan-y;}
+    .hero-arrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:9999px;background:#fff;border:1px solid #EAE0D5;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.08);z-index:5;opacity:.95}
+    .hero-arrow:hover{box-shadow:0 12px 28px rgba(0,0,0,.14)}
+    .hero-arrow.left{left:8px}
+    .hero-arrow.right{right:8px}
+    @media (max-width:768px){.hero-arrow{width:40px;height:40px}}
+
     /* Language gate */
     .lang-gate{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:50}
     .lang-card{background:#fff;border-radius:1.25rem;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:28px;max-width:520px;width:calc(100% - 32px);}
@@ -115,14 +126,15 @@
   <header class="sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-gray-200/60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <img src="BOBOY_logo_basic_blue.png" alt="BOBOY" class="h-10 w-auto">
+        <!-- Заменён логотип на обрезанный файл -->
+        <img src="BOBOY_logo_basic_blue (1).png" alt="BOBOY" class="h-10 w-auto">
         <div class="leading-tight">
           <div class="font-heading font-extrabold text-2xl tracking-wide" style="color:var(--brand-blue)">BOBOY</div>
           <div id="subtitle" class="text-xs uppercase tracking-wider" style="color:var(--brand-dark-text)">UZBEK EATERY</div>
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <!-- Кнопка смены языка: показываем и на мобилке -->
+        <!-- Кнопка смены языка: только иконка мира -->
         <button id="change-language" class="inline-flex items-center px-3 py-2 rounded-lg bg-white/0 hover:bg-gray-500/5 transition text-sm" aria-label="Язык">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-70"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
         </button>
@@ -132,7 +144,7 @@
   </header>
 
   <!-- HERO (4.png в фоне, автосмена каждые 5с) -->
-  <section class="relative overflow-hidden hero-bg">
+  <section id="hero-slider" class="relative overflow-hidden hero-bg select-none">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 hero-content">
       <div class="grid md:grid-cols-2 gap-12 items-center">
         <div id="hero-text" class="fade-in">
@@ -147,12 +159,20 @@
         <div class="fade-in" style="animation-delay:.1s">
           <div class="relative card p-3 shadow-2xl">
             <div class="relative aspect-square rounded-xl overflow-hidden">
-              <img id="dishOfDayImage" src="https://images.pexels.com/photos/10398939/pexels-photo-10398939.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Острый Плов" class="w-full h-full object-cover transform transition-transform duration-500 ease-in-out">
+              <!-- Первичная картинка: лагман -->
+              <img id="dishOfDayImage" src="Лагман Уйгурский.JPG" alt="Лагман уйгурский" class="w-full h-full object-cover transform transition-transform duration-500 ease-in-out">
             </div>
           </div>
         </div>
       </div>
     </div>
+    <!-- Кнопки управления -->
+    <button class="hero-arrow left" aria-label="Предыдущий слайд">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button class="hero-arrow right" aria-label="Следующий слайд">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
   </section>
 
   <!-- Controls -->
@@ -197,8 +217,6 @@
     </div>
   </footer>
 
-  <!-- Модалка корзины/калькулятора УДАЛЕНА по задаче -->
-
   <!-- Language gate -->
   <div id="lang-gate" class="lang-gate">
     <div class="lang-card">
@@ -214,14 +232,71 @@
 
   <script>
   // ===== Strings =====
-  const STR={ru:{topbarSubtitle:"UZBEK EATERY",changeLanguage:"Язык",dishOfDay:"Блюдо дня",dishOfDayDesc:"Легендарный свадебный плов в его огненной интерпретации. С отборной бараниной, красным перцем и восточными специями.",chefRecommends:"Рекомендует шеф",vegetarian:"Вегетарианское",searchPlaceholder:"Поиск по меню…",vegOnly:"Только вегетарианское",locations:"Адреса",footerCopy:"Атмосфера Узбекистана: уникальные ароматы и вкусы.",allergyNote:"Пожалуйста, предупредите нас о любых аллергиях. Состав блюд может незначительно отличаться.",addToOrder:"В заказ",cartTitle:"Ваш заказ / Калькулятор",cartEmpty:"Ваша корзина пуста",subtotal:"Подытог",serviceCharge:"Процент за обслуживание (%)",total:"ИТОГО",clearCart:"Очистить заказ",tabOrder:"Принять заказ",tabGroup:"Расчет на группу",groupItem:"Выберите блюдо или сет:",groupPeople:"Количество человек:",groupPerPerson:"Цена на человека:",groupTotal:"Общая стоимость:"},en:{topbarSubtitle:"UZBEK EATERY",changeLanguage:"Language",dishOfDay:"Dish of the Day",dishOfDayDesc:"The legendary wedding pilaf in its fiery interpretation. With selected lamb, red pepper and oriental spices.",chefRecommends:"Chef recommends",vegetarian:"Vegetarian",searchPlaceholder:"Search the menu…",vegOnly:"Vegetarian only",locations:"Locations",footerCopy:"Immerse yourself in Uzbekistan’s unique tastes and aromas.",allergyNote:"Please let us know about any allergies. Ingredients may vary slightly.",addToOrder:"Add to order",cartTitle:"Your Order / Calculator",cartEmpty:"Your cart is empty",subtotal:"Subtotal",serviceCharge:"Service Charge (%)",total:"TOTAL",clearCart:"Clear Order",tabOrder:"Take Order",tabGroup:"Group Calculator",groupItem:"Select item or set:",groupPeople:"Number of people:",groupPerPerson:"Price per person:",groupTotal:"Total cost:"},uz:{topbarSubtitle:"UZBEK EATERY",changeLanguage:"Til",dishOfDay:"Kun taomi",dishOfDayDesc:"Afsonaviy to'y oshi o'zining o'tli talqinida. Tanlangan qo'zichoq, qizil qalampir va sharqona ziravorlar bilan.",chefRecommends:"Shef tavsiya qiladi",vegetarian:"Vegetarian",searchPlaceholder:"Menyu bo‘yicha qidirish…",vegOnly:"Faqat vegetarian",locations:"Manzillar",footerCopy:"Oʻzbekistonning oʻziga xos tamlari va hidlari.",allergyNote:"Allergiyangiz bo‘lsa, oldindan ayting. Tarkib biroz farq qilishi mumkin.",addToOrder:"Qo'shish",cartTitle:"Sizning buyurtmangiz / Kalkulyator",cartEmpty:"Sizning savatingiz bo'sh",subtotal:"Jami",serviceCharge:"Xizmat haqi (%)",total:"UMUMIY",clearCart:"Buyurtmani tozalash",tabOrder:"Buyurtma berish",tabGroup:"Guruh uchun hisoblash",groupItem:"Taom yoki to'plamni tanlang:",groupPeople:"Odamlar soni:",groupPerPerson:"Bir kishi uchun narx:",groupTotal:"Umumiy narx:"}};
+  const STR={
+    ru:{topbarSubtitle:"UZBEK EATERY",changeLanguage:"Язык",dishOfDay:"Блюдо дня",dishOfDayDesc:"Подборка хитов BOBOY: лагман, шашлыки и казан‑кабаб.",chefRecommends:"Рекомендует шеф",vegetarian:"Вегетарианское",searchPlaceholder:"Поиск по меню…",vegOnly:"Только вегетарианское",locations:"Адреса",footerCopy:"Атмосфера Узбекистана: уникальные ароматы и вкусы.",allergyNote:"Пожалуйста, предупредите нас о любых аллергиях. Состав блюд может незначительно отличаться.",addToOrder:"В заказ",cartTitle:"Ваш заказ / Калькулятор",cartEmpty:"Ваша корзина пуста",subtotal:"Подытог",serviceCharge:"Процент за обслуживание (%)",total:"ИТОГО",clearCart:"Очистить заказ",tabOrder:"Принять заказ",tabGroup:"Расчет на группу",groupItem:"Выберите блюдо или сет:",groupPeople:"Количество человек:",groupPerPerson:"Цена на человека:",groupTotal:"Общая стоимость:"},
+    en:{topbarSubtitle:"UZBEK EATERY",changeLanguage:"Language",dishOfDay:"Dish of the Day",dishOfDayDesc:"BOBOY best-sellers: lagman, kebabs and kazan kebab.",chefRecommends:"Chef recommends",vegetarian:"Vegetarian",searchPlaceholder:"Search the menu…",vegOnly:"Vegetarian only",locations:"Locations",footerCopy:"Immerse yourself in Uzbekistan’s unique tastes and aromas.",allergyNote:"Please let us know about any allergies. Ingredients may vary slightly.",addToOrder:"Add to order",cartTitle:"Your Order / Calculator",cartEmpty:"Your cart is empty",subtotal:"Subtotal",serviceCharge:"Service Charge (%)",total:"TOTAL",clearCart:"Clear Order",tabOrder:"Take Order",tabGroup:"Group Calculator",groupItem:"Select item or set:",groupPeople:"Number of people:",groupPerPerson:"Price per person:",groupTotal:"Total cost:"},
+    uz:{topbarSubtitle:"UZBEK EATERY",changeLanguage:"Til",dishOfDay:"Kun taomi",dishOfDayDesc:"BOBOY xitlari: lag'mon, kabob va qozon kabob.",chefRecommends:"Shef tavsiya qiladi",vegetarian:"Vegetarian",searchPlaceholder:"Menyu bo‘yicha qidirish…",vegOnly:"Faqat vegetarian",locations:"Manzillar",footerCopy:"Oʻzbekistonning oʻziga xos tamlari va hidlari.",allergyNote:"Allergiyangiz bo‘lsa, oldindan ayting. Tarkib biroz farq qilishi mumkin.",addToOrder:"Qo'shish",cartTitle:"Sizning buyurtmangiz / Kalkulyator",cartEmpty:"Sizning savatingiz bo'sh",subtotal:"Jami",serviceCharge:"Xizmat haqi (%)",total:"UMUMIY",clearCart:"Buyurtmani tozalash",tabOrder:"Buyurtma berish",tabGroup:"Guruh uchun hisoblash",groupItem:"Taom yoki to'plamni tanlang:",groupPeople:"Odamlar soni:",groupPerPerson:"Bir kishi uchun narx:",groupTotal:"Umumiy narx:"}
+  };
 
   // ===== Items & Categories =====
-  const ITEMS=(()=>{const I=(id,name,price,opts={})=>({id,name,price,description:{ru:'',en:'',uz:''},...opts});return{spicy_pilaf:I("spicy_pilaf",{ru:"Острый Плов",en:"Spicy Pilaf",uz:"Achchiq Osh"},55000),khach_ap:I("khach_ap",{ru:"Хачапури по-аджарски",en:"Khachapuri (Adjarian)",uz:"Xachapuri-Ajar"},73000,{veg:true}),kazan_kebab:I("kazan_kebab",{ru:"Казан-кабоб",en:"Kazan Kebab",uz:"Qozon kabob"},159000),passion_mango_lemonade:I("passion_mango_lemonade",{ru:"Лимонад Маракуйя-Манго",en:"Passionfruit Mango Lemonade",uz:"Marakuya Mango limonad"},73000,{veg:true}),
+  const ITEMS=(()=>{const I=(id,name,price,opts={})=>({id,name,price,description:{ru:'',en:'',uz:''},...opts});return{
+    /* УДАЛЕНО: spicy_pilaf, passion_mango_lemonade */
+    khach_ap:I("khach_ap",{ru:"Хачапури по-аджарски",en:"Khachapuri (Adjarian)",uz:"Xachapuri-Ajar"},73000,{veg:true}),
+    kazan_kebab:I("kazan_kebab",{ru:"Казан-кабоб",en:"Kazan Kebab",uz:"Qozon kabob"},159000),
     /* остальное меню */
-    suzma:I("suzma",{ru:"Сузма",en:"Suzma",uz:"Suzma"},25000,{veg:true}),marinated_veg:I("marinated_veg",{ru:"Маринованные овощи",en:"Marinated Vegetables",uz:"Tuzlangan sabzavotlar"},38000,{veg:true}),kulcha:I("kulcha",{ru:"Домашний хлеб (кулча)",en:"House Bread (Kulcha)",uz:"Non (Kulcha)"},15000,{veg:true}),garlic_nan:I("garlic_nan",{ru:"Чесночный нан",en:"Garlic Nan",uz:"Sarimsoqli non"},28000,{veg:true}),khach_meg:I("khach_meg",{ru:"Хачапури по-мегрельски",en:"Khachapuri (Megrelian)",uz:"Xachapuri-Megrel"},73000,{veg:true}),cheb_beef:I("cheb_beef",{ru:"Мини-чебурек с говядиной (4 шт)",en:"Mini Cheburek with Beef (4 pcs)",uz:"Mini cheburek (go‘shtli) (4 dona)"},40000),cheb_cheese:I("cheb_cheese",{ru:"Мини-чебурек с сыром (4 шт)",en:"Mini Cheburek with Cheese (4 pcs)",uz:"Mini cheburek (pishloqli) (4 dona)"},35000,{veg:true}),somsa_trad:I("somsa_trad",{ru:"Самса традиционная",en:"Somsa Traditional",uz:"Tandir somsa"},20000),somsa_olot:I("somsa_olot",{ru:"Самса Олот",en:"Somsa Olot",uz:"Olot somsa"},15000),turkish_meze:I("turkish_meze",{ru:"Турецкий мезе сет",en:"Turkish Meze Set",uz:"Turkcha mezze seti"},95000),achik:I("achik",{ru:"Ачик-чучук",en:"Achik Chuchuk",uz:"Achik chuchuk"},29000,{veg:true}),caesar:I("caesar",{ru:"Цезарь с курицей",en:"Caesar with Chicken",uz:"Salat Sezar tovuqli"},89000),greek:I("greek",{ru:"Греческий салат",en:"Greek Salad",uz:"Greck salad"},79000,{veg:true}),bakhor:I("bakhor",{ru:"Салат Бахор",en:"Salad Bakhor",uz:"Bahor salati"},45000,{veg:true}),olivier:I("olivier",{ru:"Оливье",en:"Olivier Salad",uz:"Salat Olivye"},63000),eggplant_tempura:I("eggplant_tempura",{ru:"Салат с баклажаном темпура",en:"Eggplant Tempura Salad",uz:"Qarsildoq baqlajon"},69000,{veg:true}),choban:I("choban",{ru:"Чобан салат",en:"Choban Salad",uz:"Choban salat"},69000,{veg:true}),kainatma:I("kainatma",{ru:"Кайнатма шурпа",en:"Kainatma Shurpa",uz:"Qaynatma sho‘rva"},79000),lagman_uyghur:I("lagman_uyghur",{ru:"Лагман уйгурский",en:"Lagman Uyghur",uz:"Uyg‘ur lag‘mon"},63000),mastava:I("mastava",{ru:"Мастава",en:"Mastava",uz:"Mastava"},55000),chicken_noodle:I("chicken_noodle",{ru:"Куриный суп с лапшой",en:"Chicken Noodle Soup",uz:"Tovuqli sho‘rva"},49000),chuchvara:I("chuchvara",{ru:"Чучвара",en:"Chuchvara",uz:"Chuchvara"},61000),moshxurda:I("moshxurda",{ru:"Мошхурда",en:"Moshxurda",uz:"Moshxo‘rda"},65000),lentil:I("lentil",{ru:"Чечевичный суп",en:"Lentil Soup",uz:"Yasmiq sho'rva"},40000,{veg:true}),festive_pilaf:I("festive_pilaf",{ru:"Праздничный плов",en:"Festive Pilaf",uz:"Osh"},50000),say_beef:I("say_beef",{ru:"Сай говяжий",en:"Beef SAY",uz:"Go‘shtli Say"},89000),manti:I("manti",{ru:"Манты (1 шт)",en:"Manti (1 pc)",uz:"Manti (1 dona)"},19000),fried_lagman:I("fried_lagman",{ru:"Лагман жареный",en:"Fried Lagman",uz:"Qovurma lag‘mon"},73000),norin:I("norin",{ru:"Норин",en:"Norin",uz:"Norin"},93000),minced_beef:I("minced_beef",{ru:"Кийма шашлык",en:"Minced Beef Kebab",uz:"Qiyma kabob"},35000),beef_kebab:I("beef_kebab",{ru:"Шашлык из говядины",en:"Beef Kebab",uz:"Mol jaz"},43000),lamb_kebab:I("lamb_kebab",{ru:"Шашлык из баранины",en:"Lamb Kebab",uz:"Qo‘y jaz"},45000),lamb_chops:I("lamb_chops",{ru:"Каре ягнёнка",en:"Lamb chops",uz:"Qo‘zi qovurg‘asi"},75000),chicken_wings:I("chicken_wings",{ru:"Куриные крылья",en:"Chicken Wings",uz:"Tovuq qanoti"},42000),veg_kebab:I("veg_kebab",{ru:"Овощной шашлык",en:"Vegetarian Kebab",uz:"Sabzavotli kabob"},35000,{veg:true}),napoleon:I("napoleon",{ru:"Наполеон",en:"Napoleon",uz:"Napoleon"},69000,{veg:true}),honey_cake:I("honey_cake",{ru:"Медовик",en:"Honey Cake",uz:"Medovik"},72000,{veg:true}),san_sebastian:I("san_sebastian",{ru:"Сан-Себастьян",en:"San Sebastian Cheesecake",uz:"San Sebastyan"},79000,{veg:true}),bakhlava:I("bakhlava",{ru:"Пахлава",en:"Bakhlava",uz:"Paxlava"},59000,{veg:true}),classic_mojito:I("classic_mojito",{ru:"Мохито классический",en:"Classic Mojito",uz:"Klassik moxito"},41000,{veg:true}),ayran:I("ayran",{ru:"Айран",en:"Ayran",uz:"Ayron"},35000,{veg:true}),black_tea:I("black_tea",{ru:"Чай черный",en:"Black tea",uz:"Qora choy"},29000,{veg:true})}})();
+    suzma:I("suzma",{ru:"Сузма",en:"Suzma",uz:"Suzma"},25000,{veg:true}),
+    marinated_veg:I("marinated_veg",{ru:"Маринованные овощи",en:"Marinated Vegetables",uz:"Tuzlangan sabzavotlar"},38000,{veg:true}),
+    kulcha:I("kulcha",{ru:"Домашний хлеб (кулча)",en:"House Bread (Kulcha)",uz:"Non (Kulcha)"},15000,{veg:true}),
+    garlic_nan:I("garlic_nan",{ru:"Чесночный нан",en:"Garlic Nan",uz:"Sarimsoqli non"},28000,{veg:true}),
+    khach_meg:I("khach_meg",{ru:"Хачапури по-мегрельски",en:"Khachapuri (Megrelian)",uz:"Xachapuri-Megrel"},73000,{veg:true}),
+    cheb_beef:I("cheb_beef",{ru:"Мини-чебурек с говядиной (4 шт)",en:"Mini Cheburek with Beef (4 pcs)",uz:"Mini cheburek (go‘shtli) (4 dona)"},40000),
+    cheb_cheese:I("cheb_cheese",{ru:"Мини-чебурек с сыром (4 шт)",en:"Mini Cheburek with Cheese (4 pcs)",uz:"Mini cheburek (pishloqli) (4 dona)"},35000,{veg:true}),
+    somsa_trad:I("somsa_trad",{ru:"Самса традиционная",en:"Somsa Traditional",uz:"Tandir somsa"},20000),
+    somsa_olot:I("somsa_olot",{ru:"Самса Олот",en:"Somsa Olot",uz:"Olot somsa"},15000),
+    turkish_meze:I("turkish_meze",{ru:"Турецкий мезе сет",en:"Turkish Meze Set",uz:"Turkcha mezze seti"},95000),
+    achik:I("achik",{ru:"Ачик-чучук",en:"Achik Chuchuk",uz:"Achik chuchuk"},29000,{veg:true}),
+    caesar:I("caesar",{ru:"Цезарь с курицей",en:"Caesar with Chicken",uz:"Salat Sezar tovuqli"},89000),
+    greek:I("greek",{ru:"Греческий салат",en:"Greek Salad",uz:"Greck salad"},79000,{veg:true}),
+    bakhor:I("bakhor",{ru:"Салат Бахор",en:"Salad Bakhor",uz:"Bahor salati"},45000,{veg:true}),
+    olivier:I("olivier",{ru:"Оливье",en:"Olivier Salad",uz:"Salat Olivye"},63000),
+    eggplant_tempura:I("eggplant_tempura",{ru:"Салат с баклажаном темпура",en:"Eggplant Tempura Salad",uz:"Qarsildoq baqlajon"},69000,{veg:true}),
+    choban:I("choban",{ru:"Чобан салат",en:"Choban Salad",uz:"Choban salat"},69000,{veg:true}),
+    kainatma:I("kainatma",{ru:"Кайнатма шурпа",en:"Kainatma Shurpa",uz:"Qaynatma sho‘rva"},79000),
+    lagman_uyghur:I("lagman_uyghur",{ru:"Лагман уйгурский",en:"Lagman Uyghur",uz:"Uyg‘ur lag‘mon"},63000),
+    mastava:I("mastava",{ru:"Мастава",en:"Mastava",uz:"Mastava"},55000),
+    chicken_noodle:I("chicken_noodle",{ru:"Куриный суп с лапшой",en:"Chicken Noodle Soup",uz:"Tovuqli sho‘rva"},49000),
+    chuchvara:I("chuchvara",{ru:"Чучвара",en:"Chuchvara",uz:"Chuchvara"},61000),
+    moshxurda:I("moshxurda",{ru:"Мошхурда",en:"Moshxurda",uz:"Moshxo‘rda"},65000),
+    lentil:I("lentil",{ru:"Чечевичный суп",en:"Lentil Soup",uz:"Yasmiq sho'rva"},40000,{veg:true}),
+    festive_pilaf:I("festive_pilaf",{ru:"Праздничный плов",en:"Festive Pilaf",uz:"Osh"},50000),
+    say_beef:I("say_beef",{ru:"Сай говяжий",en:"Beef SAY",uz:"Go‘shtli Say"},89000),
+    manti:I("manti",{ru:"Манты (1 шт)",en:"Manti (1 pc)",uz:"Manti (1 dona)"},19000),
+    fried_lagman:I("fried_lagman",{ru:"Лагман жареный",en:"Fried Lagman",uz:"Qovurma lag‘mon"},73000),
+    norin:I("norin",{ru:"Норин",en:"Norin",uz:"Norin"},93000),
+    minced_beef:I("minced_beef",{ru:"Кийма шашлык",en:"Minced Beef Kebab",uz:"Qiyma kabob"},35000),
+    beef_kebab:I("beef_kebab",{ru:"Шашлык из говядины",en:"Beef Kebab",uz:"Mol jaz"},43000),
+    lamb_kebab:I("lamb_kebab",{ru:"Шашлык из баранины",en:"Lamb Kebab",uz:"Qo‘y jaz"},45000),
+    lamb_chops:I("lamb_chops",{ru:"Каре ягнёнка",en:"Lamb chops",uz:"Qo‘zi qovurg‘asi"},75000),
+    chicken_wings:I("chicken_wings",{ru:"Куриные крылья",en:"Chicken Wings",uz:"Tovuq qanoti"},42000),
+    veg_kebab:I("veg_kebab",{ru:"Овощной шашлык",en:"Vegetarian Kebab",uz:"Sabzavotli kabob"},35000,{veg:true}),
+    napoleon:I("napoleon",{ru:"Наполеон",en:"Napoleon",uz:"Napoleon"},69000,{veg:true}),
+    honey_cake:I("honey_cake",{ru:"Медовик",en:"Honey Cake",uz:"Medovik"},72000,{veg:true}),
+    san_sebastian:I("san_sebastian",{ru:"Сан-Себастьян",en:"San Sebastian Cheesecake",uz:"San Sebastyan"},79000,{veg:true}),
+    bakhlava:I("bakhlava",{ru:"Пахлава",en:"Bakhlava",uz:"Paxlava"},59000,{veg:true}),
+    classic_mojito:I("classic_mojito",{ru:"Мохито классический",en:"Classic Mojito",uz:"Klassik moxito"},41000,{veg:true}),
+    ayran:I("ayran",{ru:"Айран",en:"Ayran",uz:"Ayron"},35000,{veg:true}),
+    black_tea:I("black_tea",{ru:"Чай черный",en:"Black tea",uz:"Qora choy"},29000,{veg:true})
+  }})();
 
-  const CATEGORIES={starters:["suzma","marinated_veg","kulcha","garlic_nan","khach_ap","khach_meg","cheb_beef","cheb_cheese","somsa_trad","somsa_olot","turkish_meze"],salads:["achik","caesar","greek","bakhor","olivier","eggplant_tempura","choban"],soups:["kainatma","lagman_uyghur","mastava","chicken_noodle","chuchvara","moshxurda","lentil"],mains:["spicy_pilaf","festive_pilaf","say_beef","manti","kazan_kebab","fried_lagman","norin"],kebabs:["minced_beef","beef_kebab","lamb_kebab","lamb_chops","chicken_wings","veg_kebab"],desserts:["napoleon","honey_cake","san_sebastian","bakhlava"],drinks:["passion_mango_lemonade","classic_mojito","ayran","black_tea"]};
+  const CATEGORIES={
+    starters:["suzma","marinated_veg","kulcha","garlic_nan","khach_ap","khach_meg","cheb_beef","cheb_cheese","somsa_trad","somsa_olot","turkish_meze"],
+    salads:["achik","caesar","greek","bakhor","olivier","eggplant_tempura","choban"],
+    soups:["kainatma","lagman_uyghur","mastava","chicken_noodle","chuchvara","moshxurda","lentil"],
+    mains:["festive_pilaf","say_beef","manti","kazan_kebab","fried_lagman","norin"], /* spicy_pilaf удалён */
+    kebabs:["minced_beef","beef_kebab","lamb_kebab","lamb_chops","chicken_wings","veg_kebab"],
+    desserts:["napoleon","honey_cake","san_sebastian","bakhlava"],
+    drinks:["classic_mojito","ayran","black_tea"] /* passion_mango_lemonade удалён */
+  };
   const CAT_NAMES={ru:{starters:"Закуски",salads:"Салаты",soups:"Супы",mains:"Горячие блюда",kebabs:"Шашлыки",desserts:"Десерты",drinks:"Напитки"},en:{starters:"Starters",salads:"Salads",soups:"Soups",mains:"Main Courses",kebabs:"Kebabs",desserts:"Desserts",drinks:"Drinks"},uz:{starters:"Yaxna taomlar",salads:"Salatlar",soups:"Sho‘rvalar",mains:"Asosiy taomlar",kebabs:"Kaboblar",desserts:"Shirinliklar",drinks:"Ichimliklar"}};
 
   let lang=localStorage.getItem('boboy_lang')||'ru';
@@ -243,22 +318,31 @@
     renderCategoryChips();
   }
 
-  // HERO конвейер
-  const HERO_IDS=["spicy_pilaf","kazan_kebab","khach_ap","passion_mango_lemonade"];
+  // HERO конвейер (слайды: лагман, шашлык, казан‑кабаб)
+  const HERO_IDS=["lagman_uyghur","beef_kebab","kazan_kebab"];
+  const HERO_IMG_SRC={
+    lagman_uyghur:"Лагман Уйгурский.JPG",
+    beef_kebab:"шашлыки.JPG",
+    kazan_kebab:"казан-кабоб.JPG"
+  };
+  const HERO_DESC_BY_ID={
+    ru:{lagman_uyghur:"Классический лагман на ручной лапше.",beef_kebab:"Сочные шашлыки с мангала.",kazan_kebab:"Казан‑кабаб — мясо и картофель в казане."},
+    en:{lagman_uyghur:"Classic Uyghur lagman with hand‑pulled noodles.",beef_kebab:"Juicy kebabs from the grill.",kazan_kebab:"Kazan kebab — hearty meat & potatoes."},
+    uz:{lagman_uyghur:"Qo'l tortilgan lag'mon.",beef_kebab:"Shirador kaboblar.",kazan_kebab:"Qozon kabob — go'sht va kartoshka."}
+  };
   let heroIdx=0, heroTimer=null;
   function applyHero(id){
     const d=ITEMS[id]; if(!d) return;
     const name=$('#dishOfDayName'), desc=$('#dishOfDayDesc'), img=$('#dishOfDayImage'), badges=$('#dishOfDayBadges'), box=$('#hero-text');
 
-    // зафиксировать высоту бокса на время смены, чтобы не было "дергания"
     const startH=box.offsetHeight; box.style.height=startH+'px';
 
     [name,desc].forEach(el=>el&&el.classList.add('slide-out')); if(img){img.classList.add('slide-out')}
 
     setTimeout(()=>{
       if(name) name.textContent=locName(d.name);
-      if(desc) desc.textContent=STR[lang].dishOfDayDesc;
-      if(img){ img.src = (id==="passion_mango_lemonade"? 'https://images.pexels.com/photos/5531315/pexels-photo-5531315.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' : id==="khach_ap" ? 'https://images.pexels.com/photos/6438757/pexels-photo-6438757.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' : id==="kazan_kebab" ? 'https://images.pexels.com/photos/1624487/pexels-photo-1624487.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' : 'https://images.pexels.com/photos/10398939/pexels-photo-10398939.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'); img.alt=locName(d.name); }
+      if(desc) desc.textContent=HERO_DESC_BY_ID[lang]?.[id] || STR[lang].dishOfDayDesc;
+      if(img){ img.src = HERO_IMG_SRC[id] || img.src; img.alt=locName(d.name); }
       if(badges) badges.innerHTML=`<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-lg border bg-amber-500/10 border-amber-500/20 text-amber-800 font-bold">${fmt(d.price)}</span>`;
 
       [name,desc].forEach(el=>{el&&el.classList.remove('slide-out');el&&el.classList.add('slide-in')}); if(img){img.classList.remove('slide-out');img.classList.add('slide-in')}
@@ -267,7 +351,38 @@
       setTimeout(()=>{[name,desc,img].forEach(el=>el&&el.classList.remove('slide-in'))},480);
     },200);
   }
-  function startHero(){applyHero(HERO_IDS[heroIdx]); if(heroTimer) clearInterval(heroTimer); heroTimer=setInterval(()=>{heroIdx=(heroIdx+1)%HERO_IDS.length; applyHero(HERO_IDS[heroIdx]);},5000)}
+  function startHero(){applyHero(HERO_IDS[heroIdx]);restartHeroTimer();}
+  function restartHeroTimer(){if(heroTimer) clearInterval(heroTimer);heroTimer=setInterval(()=>{heroIdx=(heroIdx+1)%HERO_IDS.length;applyHero(HERO_IDS[heroIdx]);},5000)}
+  function nextHero(){heroIdx=(heroIdx+1)%HERO_IDS.length;applyHero(HERO_IDS[heroIdx]);restartHeroTimer()}
+  function prevHero(){heroIdx=(heroIdx-1+HERO_IDS.length)%HERO_IDS.length;applyHero(HERO_IDS[heroIdx]);restartHeroTimer()}
+  function enableHeroManual(){
+    const area=document.getElementById('hero-slider');
+    if(!area) return;
+    // Кнопки
+    area.querySelector('.hero-arrow.left')?.addEventListener('click',prevHero);
+    area.querySelector('.hero-arrow.right')?.addEventListener('click',nextHero);
+    // Touch свайп
+    let sx=null,sy=null,active=false;const TH=40;
+    area.addEventListener('touchstart',e=>{const t=e.changedTouches[0];sx=t.clientX;sy=t.clientY;active=true},{passive:true});
+    area.addEventListener('touchmove',e=>{
+      if(!active) return; const t=e.changedTouches[0];
+      const dx=t.clientX-sx; const dy=t.clientY-sy;
+      if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>TH){
+        active=false; if(dx<0)nextHero(); else prevHero();
+      }
+    },{passive:true});
+    area.addEventListener('touchend',()=>{active=false},{passive:true});
+    // Mouse/Pointer свайп
+    let px=null,py=null,down=false;
+    area.addEventListener('pointerdown',e=>{px=e.clientX;py=e.clientY;down=true});
+    area.addEventListener('pointerup',e=>{
+      if(!down) return; const dx=e.clientX-px; const dy=e.clientY-py;
+      if(Math.abs(dx)>Math.abs(dy)*1.5 && Math.abs(dx)>TH){ if(dx<0)nextHero(); else prevHero(); }
+      down=false;
+    });
+    // Клавиатура
+    window.addEventListener('keydown',e=>{ if(e.key==='ArrowLeft') prevHero(); else if(e.key==='ArrowRight') nextHero(); });
+  }
 
   // Карточка блюда: УБРАНА кнопка "В заказ"
   function buildCard(item){
@@ -325,8 +440,6 @@
     $('#search')?.addEventListener('input',e=>{query=e.target.value;renderActiveCategory()});
     $('#vegOnlyBtn')?.addEventListener('click',()=>{vegOnly=!vegOnly;$('#vegOnlyBtn').classList.toggle('bg-green-100',vegOnly);$('#vegOnlyBtn').classList.toggle('border-green-300',vegOnly);renderActiveCategory()});
 
-    // (кнопки заказа отсутствуют)
-
     // открыть выбор языка из шапки
     document.body.addEventListener('open-lang-gate', showLangGate);
 
@@ -361,7 +474,7 @@
 
   function init(){
     renderTopCopy();
-    startHero();
+    startHero(); enableHeroManual();
     renderActiveCategory();
     renderCart(); // молча выйдет, т.к. UI удалён
     if(!localStorage.getItem('boboy_lang')) showLangGate();
@@ -372,7 +485,7 @@
   function hideLangGate(){ const g=$('#lang-gate'); if(g) g.style.display='none' }
 
   // ====== Ограничение декора ======
-  // Осёл: фиксирован внизу экрана, но "останавливается" перед футером.
+  // Осёл: fixed снизу экрана, но "останавливается" перед футером.
   // Левая картинка: ПРИКРЕПЛЯЕТСЯ к ВЕРХНЕМУ ЛЕВОМУ УГЛУ РАЗДЕЛА МЕНЮ (#menu-root),
   // как только отображается (onload), и остаётся выровненной по левому краю контейнера меню.
   // При касании своим низом верха футера — отлипает и фиксируется абсолютом сразу над футером.
@@ -405,7 +518,6 @@
     const menuRect=menu.getBoundingClientRect();
     const leftImgH=left.getBoundingClientRect().height;
 
-    // документные координаты, если остаться в режиме fixed
     const docTopIfFixed = scrollY + menuRect.top;
     const docBottomIfFixed = docTopIfFixed + leftImgH;
 
