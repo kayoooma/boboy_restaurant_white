@@ -10,9 +10,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
   <!-- preload art -->
-  <link rel="preload" as="image" href="4.png">
-  <link rel="preload" as="image" href="6.png">
-  <link rel="preload" as="image" href="10.png">
+  <link rel="preload" as="image" href="4.webp">
+  <link rel="preload" as="image" href="6.webp">
+  <link rel="preload" as="image" href="10.webp">
+  <link rel="preload" as="image" href="Лагман Уйгурский.webp">
+  <link rel="preload" as="image" href="шашлыки.webp">
+  <link rel="preload" as="image" href="казан-кабоб.webp">
   <style>
     :root{
       --brand-beige:#FDF6E9;
@@ -65,7 +68,7 @@
 
     /* HERO фон (4.png) */
     .hero-bg{position:relative;background:#fff}
-    .hero-bg::before{content:'';position:absolute;inset:0;background-image:url('4.png');background-size:cover;background-position:center bottom;z-index:0;opacity:.24}
+    .hero-bg::before{content:'';position:absolute;inset:0;background-image:url('4.webp');background-size:cover;background-position:center bottom;z-index:0;opacity:.24}
     .hero-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(253,246,233,1) 0%,rgba(253,246,233,.55) 35%,rgba(253,246,233,0) 60%);z-index:0}
     .hero-content{position:relative;z-index:1}
 
@@ -81,7 +84,7 @@
 
     /* Футер: контраст + фон 10.png */
     .footer-art{position:relative;z-index:0;overflow:hidden}
-    .footer-art::before{content:'';position:absolute;inset:0;background:url('10.png') center bottom/cover no-repeat;opacity:.85;pointer-events:none;z-index:0}
+    .footer-art::before{content:'';position:absolute;inset:0;background:url('10.webp') center bottom/cover no-repeat;opacity:.85;pointer-events:none;z-index:0}
     /* светлая подложка для читаемости */
     .footer-art::after{content:'';position:absolute;inset:0;background:linear-gradient(to top, rgba(253,246,233,.92) 0%, rgba(253,246,233,.86) 40%, rgba(253,246,233,.68) 100%);z-index:0}
     .footer-contrast h3,.footer-contrast .font-heading{color:var(--brand-blue)}
@@ -118,8 +121,8 @@
 <body class="min-h-screen">
   <!-- Декор: реальные DOM-элементы -->
   <div id="decor-layer" aria-hidden="true">
-    <img id="left-art" src="6.png" alt="Фоновая иллюстрация слева">
-    <img id="donkey-art" src="img399.png" alt="Насреддин с ослом">
+    <img id="left-art" src="6.webp" alt="Фоновая иллюстрация слева">
+    <img id="donkey-art" src="img399.webp" alt="Насреддин с ослом">
   </div>
 
   <!-- Topbar -->
@@ -160,7 +163,7 @@
           <div class="relative card p-3 shadow-2xl">
             <div class="relative aspect-square rounded-xl overflow-hidden">
               <!-- Первичная картинка: лагман -->
-              <img id="dishOfDayImage" src="Лагман Уйгурский.JPG" alt="Лагман уйгурский" class="w-full h-full object-cover transform transition-transform duration-500 ease-in-out">
+              <img id="dishOfDayImage" src="Лагман Уйгурский.webp" alt="Лагман уйгурский" class="w-full h-full object-cover transform transition-transform duration-500 ease-in-out">
             </div>
           </div>
         </div>
@@ -321,9 +324,9 @@
   // HERO конвейер (слайды: лагман, шашлык, казан‑кабаб)
   const HERO_IDS=["lagman_uyghur","beef_kebab","kazan_kebab"];
   const HERO_IMG_SRC={
-    lagman_uyghur:"Лагман Уйгурский.JPG",
-    beef_kebab:"шашлыки.JPG",
-    kazan_kebab:"казан-кабоб.JPG"
+    lagman_uyghur:"Лагман Уйгурский.webp",
+    beef_kebab:"шашлыки.webp",
+    kazan_kebab:"казан-кабоб.webp"
   };
   const HERO_DESC_BY_ID={
     ru:{lagman_uyghur:"Классический лагман на ручной лапше.",beef_kebab:"Сочные шашлыки с мангала.",kazan_kebab:"Казан‑кабаб — мясо и картофель в казане."},
